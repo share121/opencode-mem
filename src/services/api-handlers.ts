@@ -11,6 +11,7 @@ import type { MemoryType } from "../types/index.js";
 import { userPromptManager } from "./user-prompt/user-prompt-manager.js";
 import type { UserProfileData } from "./user-profile/types.js";
 import { sortProfileItems } from "../utils/profile.js";
+import { stripProfileEmbeddings } from "./user-profile/profile-utils.js";
 import type { ShardInfo } from "./turso/types.js";
 
 async function getAllMemoryShards(): Promise<ShardInfo[]> {
@@ -915,7 +916,7 @@ export async function handleGetUserProfile(userId?: string): Promise<ApiResponse
           message: "No profile found. Keep chatting to build your profile.",
         },
       };
-    const profileData = JSON.parse(profile.profileData);
+    const profileData = stripProfileEmbeddings(JSON.parse(profile.profileData));
     profileData.preferences = sortProfileItems(profileData.preferences as any[], "confidence");
     profileData.patterns = sortProfileItems(profileData.patterns as any[], "frequency");
     profileData.workflows = sortProfileItems(profileData.workflows as any[], "frequency");

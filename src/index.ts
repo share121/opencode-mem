@@ -757,6 +757,8 @@ export const OpenCodeMemPlugin: Plugin = async (ctx: PluginInput) => {
 
                 const { userProfileManager } =
                   await import("./services/user-profile/user-profile-manager.js");
+                const { stripProfileEmbeddings } =
+                  await import("./services/user-profile/profile-utils.js");
 
                 const userId = tags.user.userEmail || "unknown";
 
@@ -833,7 +835,7 @@ export const OpenCodeMemPlugin: Plugin = async (ctx: PluginInput) => {
                 // --- READ: no content provided ---
                 const profile = await userProfileManager.getActiveProfile(userId);
                 if (!profile) return JSON.stringify({ success: true, profile: null });
-                const pData = JSON.parse(profile.profileData);
+                const pData = stripProfileEmbeddings(JSON.parse(profile.profileData));
                 return JSON.stringify({
                   success: true,
                   profile: {
