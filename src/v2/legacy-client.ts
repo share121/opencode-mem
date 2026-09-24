@@ -239,8 +239,22 @@ export function toLegacyEvent(raw: any): { type: string; properties: any } {
   const envelope = raw?.payload ?? raw;
   const source = envelope?.type === "sync" && envelope.syncEvent ? envelope.syncEvent : envelope;
   const rawType = typeof source?.type === "string" ? source.type.replace(/\.1$/, "") : source?.type;
-  const type = rawType === "session.compaction.ended" ? "session.compacted" : rawType;
   const data = source?.data ?? {};
+  // OpenCode v2 no longer emits the deprecated `session.idle` (nor an idle
+  // `session.status`). A finished session execution is the equivalent signal,
+  // so translate it back for the V1 idle handler (auto-capture and
+  // user-profile learning).
+  const isIdleStatus = rawType === "session.status" && data?.status?.type === "idle";
+  const isExecutionEnd =
+    rawType === "session.execution.succeeded" ||
+    rawType === "session.execution.failed" ||
+    rawType === "session.execution.interrupted";
+  const type =
+    rawType === "session.compaction.ended"
+      ? "session.compacted"
+      : isIdleStatus || isExecutionEnd
+        ? "session.idle"
+        : rawType;
   if (source && typeof source === "object" && "properties" in source) {
     return { type, properties: source.properties };
   }

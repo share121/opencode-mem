@@ -121,6 +121,45 @@ describe("OpenCode v2 legacy client bridge", () => {
     });
   });
 
+  it("maps V2 idle session.status events back to session.idle", () => {
+    expect(
+      toLegacyEvent({
+        type: "session.status",
+        data: { sessionID: "ses-1", status: { type: "idle" } },
+      })
+    ).toEqual({
+      type: "session.idle",
+      properties: { sessionID: "ses-1", status: { type: "idle" } },
+    });
+    // Non-idle statuses and unrelated event types pass through untouched.
+    expect(
+      toLegacyEvent({
+        type: "session.status",
+        data: { sessionID: "ses-1", status: { type: "busy" } },
+      }).type
+    ).toBe("session.status");
+    expect(toLegacyEvent({ type: "message.updated", data: { sessionID: "ses-1" } }).type).toBe(
+      "message.updated"
+    );
+  });
+
+  it("maps finished V2 session executions to session.idle", () => {
+    for (const type of [
+      "session.execution.succeeded",
+      "session.execution.failed",
+      "session.execution.interrupted",
+    ]) {
+      expect(toLegacyEvent({ type, data: { sessionID: "ses-1" } })).toEqual({
+        type: "session.idle",
+        properties: { sessionID: "ses-1" },
+      });
+    }
+    // Execution lifecycle start is not a turn end and must not trigger capture.
+    expect(
+      toLegacyEvent({ type: "session.execution.started", data: { sessionID: "ses-1" } }).type
+    ).toBe("session.execution.started");
+  });
+
   it("filters the global event stream by direct or session location", async () => {
     const ctx = createContext();
     expect(
