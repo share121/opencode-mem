@@ -63,11 +63,12 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only init
   }, []);
 
+  const loadUserProfile = profile.loadUserProfile;
   useEffect(() => {
     if (currentView === "profile") {
-      void profile.loadUserProfile();
+      void loadUserProfile();
     }
-  }, [currentView, profile.loadUserProfile]);
+  }, [currentView, loadUserProfile]);
 
   function onLangToggle() {
     setLangLabel(cycleLanguage().toUpperCase());

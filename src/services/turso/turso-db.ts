@@ -1,4 +1,4 @@
-import type { Client, InArgs, InValue, ResultSet, Transaction } from "@libsql/client";
+import type { Client, InArgs, ResultSet, Transaction } from "@libsql/client";
 
 type Row = Record<string, unknown>;
 

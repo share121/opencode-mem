@@ -222,7 +222,9 @@ function loadConfigFromPaths(paths: string[]): OpenCodeMemConfig {
         const content = readFileSync(path, "utf-8");
         const json = stripJsoncComments(content);
         return JSON.parse(json) as OpenCodeMemConfig;
-      } catch {}
+      } catch {
+        // ignore unreadable or invalid config files
+      }
     }
   }
   return {};
@@ -566,7 +568,9 @@ function ensureConfigExists(): void {
       writeFileSync(configPath, CONFIG_TEMPLATE, "utf-8");
       console.log(`\n✓ Created config template: ${configPath}`);
       console.log("  Edit this file to customize opencode-mem settings.\n");
-    } catch {}
+    } catch {
+      // ignore if the template cannot be written
+    }
   }
 }
 
@@ -777,7 +781,7 @@ function buildConfig(fileConfig: OpenCodeMemConfig) {
   };
 }
 
-let _globalFileConfig = loadConfigFromPaths(CONFIG_FILES);
+const _globalFileConfig = loadConfigFromPaths(CONFIG_FILES);
 export let CONFIG = buildConfig(_globalFileConfig);
 
 type RuntimeConfig = ReturnType<typeof buildConfig>;

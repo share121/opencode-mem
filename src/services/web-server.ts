@@ -354,7 +354,7 @@ export class WebServer {
       // Reset startPromise so _start() can run again
       this.startPromise = null;
       await this._start();
-    } catch (error) {
+    } catch {
       this.startHealthCheckLoop();
       return;
     }
@@ -807,7 +807,7 @@ export class WebServer {
           "Cache-Control": cacheControl,
         },
       });
-    } catch (error) {
+    } catch {
       return new Response("File not found", { status: 404 });
     }
   }

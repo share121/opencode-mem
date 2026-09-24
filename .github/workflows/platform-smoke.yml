@@ -12,6 +12,9 @@ on:
       - "scripts/verify-nested-onnxruntime-fixture.mjs"
       - "scripts/smoke-test.mjs"
       - "web/**"
+      - "eslint.config.js"
+      - ".prettierrc"
+      - ".prettierignore"
       - ".github/workflows/platform-smoke.yml"
   workflow_dispatch:
 
@@ -51,6 +54,12 @@ jobs:
 
       - name: Typecheck source
         run: bun run typecheck
+
+      - name: Lint source
+        run: bun run lint
+
+      - name: Check formatting
+        run: bun run format:check
 
       - name: Build package artifacts
         run: bun run build

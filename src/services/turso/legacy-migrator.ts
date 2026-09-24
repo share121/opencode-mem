@@ -328,7 +328,7 @@ async function migrateMemoryShard(dbPath: string): Promise<ShardMigrationSidecar
     return readSidecar(dbPath);
   }
 
-  let db: TursoDb | null = await tursoConnectionManager.getConnection(dbPath);
+  const db = await tursoConnectionManager.getConnection(dbPath);
   const hasTable = await hasMemoriesTable(db);
 
   if (!hasTable) {
@@ -420,7 +420,6 @@ async function migrateMemoryShard(dbPath: string): Promise<ShardMigrationSidecar
   });
 
   const backup = backupPath(dbPath);
-  db = null;
   await tursoConnectionManager.closeConnection(dbPath);
   if (existsSync(dbPath)) {
     await withSqliteFileLockRetry(() => renameSync(dbPath, backup));
@@ -556,7 +555,9 @@ function recoverInterruptedReembedSwaps(): void {
         unlinkSync(statePath);
         log("Recovered interrupted re-embed shard swap", { dbPath: expectedDbPath });
       } catch (error) {
-        throw new Error(`Failed to recover re-embed swap ${statePath}: ${String(error)}`);
+        throw new Error(`Failed to recover re-embed swap ${statePath}: ${String(error)}`, {
+          cause: error,
+        });
       }
     }
   }

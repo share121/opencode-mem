@@ -498,7 +498,9 @@ export class ShardPathMigrationService {
         newHash: state.newHash,
       });
     } catch (error) {
-      throw new Error(`Failed to recover path-migrate swap ${statePath}: ${String(error)}`);
+      throw new Error(`Failed to recover path-migrate swap ${statePath}: ${String(error)}`, {
+        cause: error,
+      });
     }
   }
 }

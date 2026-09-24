@@ -799,7 +799,7 @@ describe("resolveOpencodeModelRef / inherit", () => {
   let tempRoot: string | undefined;
 
   beforeEach(async () => {
-    const { mkdtempSync, mkdirSync, writeFileSync } = await import("node:fs");
+    const { mkdtempSync } = await import("node:fs");
     const { tmpdir } = await import("node:os");
     const { join } = await import("node:path");
     tempRoot = mkdtempSync(join(tmpdir(), "opencode-mem-inherit-"));

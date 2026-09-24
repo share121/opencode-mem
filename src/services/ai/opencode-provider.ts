@@ -465,7 +465,8 @@ async function fetchJson<T>(endpoint: FetchEndpoint, init: RequestInit): Promise
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `opencode-mem: failed to fetch ${endpoint.label} at ${diagnosticUrl(endpoint.url)}: ${message}`
+      `opencode-mem: failed to fetch ${endpoint.label} at ${diagnosticUrl(endpoint.url)}: ${message}`,
+      { cause: error }
     );
   }
 
@@ -572,7 +573,8 @@ async function deleteSession(base: string, sessionID: string, directory?: string
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `opencode-mem: failed to fetch DELETE /session/{id} at ${diagnosticUrl(url)}: ${message}`
+      `opencode-mem: failed to fetch DELETE /session/{id} at ${diagnosticUrl(url)}: ${message}`,
+      { cause: error }
     );
   }
   // DELETE /session/:id returns boolean. We only care that it ran; failures

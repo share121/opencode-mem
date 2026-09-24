@@ -1,6 +1,5 @@
 import { tursoConnectionManager } from "./connection-manager.js";
 import { log } from "../logger.js";
-import { CONFIG } from "../../config.js";
 import type { MemoryRecord, SearchResult, ShardInfo } from "./types.js";
 import { distanceToSimilarity, vectorToJson } from "./vector-utils.js";
 import type { TursoDb } from "./turso-db.js";

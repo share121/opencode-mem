@@ -71,7 +71,7 @@ export function getOnnxruntimeNapiDirName(
   const binDir = join(getPinnedOnnxruntimePackageRoot(), "bin");
   if (!existsSync(binDir)) return "napi-v3";
 
-  let entries: string[] = [];
+  let entries: string[];
   try {
     entries = readdirSync(binDir, { withFileTypes: true })
       .filter((entry) => entry.isDirectory() && /^napi-v\d+$/.test(entry.name))

@@ -243,9 +243,6 @@ export const OpenCodeMemPlugin: Plugin = async (ctx: PluginInput) => {
   let webServer: WebServer | null = null;
   let idleTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  if (!isConfigured()) {
-  }
-
   const GLOBAL_PLUGIN_WARMUP_KEY = Symbol.for("opencode-mem.plugin.warmedup");
 
   if (!(globalThis as any)[GLOBAL_PLUGIN_WARMUP_KEY] && isConfigured()) {
@@ -419,14 +416,12 @@ export const OpenCodeMemPlugin: Plugin = async (ctx: PluginInput) => {
     }
   };
 
-  process.on("SIGINT", shutdownHandler);
-  process.on("SIGTERM", shutdownHandler);
-  process.on("beforeExit", () => {
+  const beforeExitHandler = () => {
     if (!cleanedUp) {
       void cleanupPlugin();
     }
-  });
-  process.on("exit", () => {
+  };
+  const exitHandler = () => {
     // Best-effort sync close when the host exits without SIGINT/SIGTERM.
     if (!cleanedUp) {
       try {
@@ -435,9 +430,24 @@ export const OpenCodeMemPlugin: Plugin = async (ctx: PluginInput) => {
         // ignore — module may already be torn down
       }
     }
-  });
+  };
+
+  process.on("SIGINT", shutdownHandler);
+  process.on("SIGTERM", shutdownHandler);
+  process.on("beforeExit", beforeExitHandler);
+  process.on("exit", exitHandler);
+
+  const disposePlugin = async () => {
+    process.off("SIGINT", shutdownHandler);
+    process.off("SIGTERM", shutdownHandler);
+    process.off("beforeExit", beforeExitHandler);
+    process.off("exit", exitHandler);
+    await cleanupPlugin();
+  };
 
   return {
+    // V1 ignores this extra hook; the V2 adapter uses it during plugin reload.
+    dispose: disposePlugin,
     config: async (cfg) => {
       applyStructuredOutputAgentConfig(cfg);
     },
@@ -708,7 +718,7 @@ export const OpenCodeMemPlugin: Plugin = async (ctx: PluginInput) => {
                   tagGuidance: "Use technical keywords for search. Tags rank highest.",
                 });
 
-              case "add":
+              case "add": {
                 if (!args.content)
                   return JSON.stringify({ success: false, error: "content required" });
                 const sanitizedContent = stripPrivateContent(args.content);
@@ -734,8 +744,9 @@ export const OpenCodeMemPlugin: Plugin = async (ctx: PluginInput) => {
                   id: result.success ? result.id : undefined,
                   tags: parsedTags,
                 });
+              }
 
-              case "search":
+              case "search": {
                 if (!args.query) return JSON.stringify({ success: false, error: "query required" });
                 const searchRes = await memoryClient.searchMemories(
                   args.query,
@@ -745,6 +756,7 @@ export const OpenCodeMemPlugin: Plugin = async (ctx: PluginInput) => {
                 if (!searchRes.success)
                   return JSON.stringify({ success: false, error: searchRes.error });
                 return formatSearchResults(args.query, searchRes, args.limit);
+              }
 
               case "profile": {
                 if (args.query) {
@@ -846,7 +858,7 @@ export const OpenCodeMemPlugin: Plugin = async (ctx: PluginInput) => {
                 });
               }
 
-              case "list":
+              case "list": {
                 const listRes = await memoryClient.listMemories(
                   tags.project.tag,
                   args.limit || 20,
@@ -863,12 +875,14 @@ export const OpenCodeMemPlugin: Plugin = async (ctx: PluginInput) => {
                     createdAt: m.createdAt,
                   })),
                 });
+              }
 
-              case "forget":
+              case "forget": {
                 if (!args.memoryId)
                   return JSON.stringify({ success: false, error: "memoryId required" });
                 const delRes = await memoryClient.deleteMemory(args.memoryId);
                 return JSON.stringify({ success: delRes.success, message: `Memory removed` });
+              }
 
               case "list-shards": {
                 const listShardsRes = await memoryClient.listShards(directory);

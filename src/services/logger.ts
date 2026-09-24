@@ -72,7 +72,9 @@ function rotateLog() {
     }
 
     cleanupOldLogs();
-  } catch {}
+  } catch {
+    // ignore log rotation failures
+  }
 }
 
 function getArchiveDate(stats: { mtime: Date }): string {
@@ -95,7 +97,9 @@ function cleanupOldLogs() {
         unlinkSync(join(logDir, file));
       }
     }
-  } catch {}
+  } catch {
+    // ignore stale-log cleanup failures
+  }
 }
 
 function ensureLoggerInitialized() {

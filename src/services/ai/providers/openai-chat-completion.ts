@@ -407,7 +407,9 @@ export class OpenAIChatCompletionProvider extends BaseAIProvider {
                         if (repaired !== fixed) {
                           try {
                             return JSON.parse(repaired);
-                          } catch {}
+                          } catch {
+                            // ignore and fall through to the original parse error
+                          }
                         }
                       }
                     }

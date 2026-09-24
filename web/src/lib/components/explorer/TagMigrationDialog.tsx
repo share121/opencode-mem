@@ -42,7 +42,6 @@ export function TagMigrationDialog({ open = false, count = 0, onOpenChange, onCo
     setStatus(t("status-migration-init"));
     setProgress(0);
 
-    let totalProcessed = 0;
     let hasMore = true;
     let attempts = 0;
     const maxAttempts = 1000;
@@ -65,11 +64,11 @@ export function TagMigrationDialog({ open = false, count = 0, onOpenChange, onCo
         return;
       }
 
-      totalProcessed = result.data.processed;
+      const processed = result.data.processed;
       hasMore = result.data.hasMore;
       const total = result.data.total;
-      setProgress(total > 0 ? Math.round((totalProcessed / total) * 100) : 0);
-      setStatus(t("status-migration-progress", { current: totalProcessed, total }));
+      setProgress(total > 0 ? Math.round((processed / total) * 100) : 0);
+      setStatus(t("status-migration-progress", { current: processed, total }));
       if (hasMore) {
         await new Promise((resolve) => setTimeout(resolve, 100));
       }

@@ -15,9 +15,6 @@ const CENTROID_EMA_WEIGHT_COMPLEMENT = 0.15;
 const THREE_WAY_CENTROID_W1 = 0.45;
 const THREE_WAY_CENTROID_W2 = 0.45;
 const THREE_WAY_CENTROID_W3 = 0.1;
-const THOMPSON_PRIOR_ALPHA = 0.5;
-const THOMPSON_PRIOR_BETA = 1.5;
-const THOMPSON_PRIOR_RECOVERY_RATE = 0.8;
 const DIRECTION_VALIDATION_TOLERANCE = 0.03;
 
 /**
@@ -709,7 +706,7 @@ export class UserProfileManager {
           const strongThreshold = sameCat ? sameCatStrong : crossCatStrong;
           const weakThreshold = sameCat ? sameCatWeak : crossCatWeak;
 
-          let band: "strong" | "weak" | null = null;
+          let band: "strong" | "weak";
           if (score >= strongThreshold) {
             band = "strong";
           } else if (score >= weakThreshold) {
@@ -1026,12 +1023,10 @@ export class UserProfileManager {
           const weakBeta = ((existingItem as any).weakBeta || 1) + (1 - top1Score);
           const effectiveAlpha = weakAlpha;
           const effectiveBeta = weakBeta;
-          let upgraded = false;
-          if (effectiveAlpha + effectiveBeta > 7) {
-            upgraded = effectiveAlpha / (effectiveAlpha + effectiveBeta) >= 0.45;
-          } else {
-            upgraded = sampleBeta(effectiveAlpha, effectiveBeta) >= 0.5;
-          }
+          const upgraded =
+            effectiveAlpha + effectiveBeta > 7
+              ? effectiveAlpha / (effectiveAlpha + effectiveBeta) >= 0.45
+              : sampleBeta(effectiveAlpha, effectiveBeta) >= 0.5;
           if (upgraded) {
             const oldFreq = (existingItem as any).frequency || 1;
             const centroid = (existingItem as any).centroid as number[];
@@ -1130,7 +1125,9 @@ export class UserProfileManager {
           });
           initCentroid = Array.from(emb);
           initAnchor = initCentroid;
-        } catch {}
+        } catch {
+          // keep the item without an embedding centroid
+        }
       }
 
       existing.push(this.initItem(newItem, itemType, initCentroid, initAnchor) as T);
@@ -1348,7 +1345,7 @@ export class UserProfileManager {
     this.syncConfidence(item);
   }
 
-  private async detectConflicts(items: any[], itemType: string, profileId: string): Promise<void> {
+  private async detectConflicts(items: any[], itemType: string, _profileId: string): Promise<void> {
     const candidates: { a: any; b: any; cos: number }[] = [];
     const limit = items.length;
     for (let i = 0; i < limit; i++) {

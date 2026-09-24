@@ -42,10 +42,7 @@ async function removeDatabaseFiles(dbPath) {
         break;
       } catch (error) {
         const code = error?.code;
-        if (
-          attempt >= FILE_LOCK_RETRY_DELAYS_MS.length ||
-          !RETRYABLE_FILE_LOCK_CODES.has(code)
-        ) {
+        if (attempt >= FILE_LOCK_RETRY_DELAYS_MS.length || !RETRYABLE_FILE_LOCK_CODES.has(code)) {
           throw error;
         }
         await delay(FILE_LOCK_RETRY_DELAYS_MS[attempt]);

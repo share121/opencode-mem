@@ -25,7 +25,6 @@ describe("turso legacy migrator", () => {
   ): Promise<string> {
     const dbPath = join(dir, fileName);
     const db = new Database(dbPath);
-    const dims = memories[0]?.vector.length ?? 768;
 
     db.exec(`CREATE TABLE memories (
           id TEXT PRIMARY KEY,

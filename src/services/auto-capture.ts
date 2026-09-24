@@ -110,7 +110,7 @@ async function capturePrompt(
           summaryResult = await generateSummary(ctx, context, sessionID, prompt.content, prompt);
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
-          throw new Error(`Summary generation failed: ${message}`);
+          throw new Error(`Summary generation failed: ${message}`, { cause: error });
         }
 
         if (!summaryResult || summaryResult.type === "skip") {

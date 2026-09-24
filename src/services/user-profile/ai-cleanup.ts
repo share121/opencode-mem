@@ -394,7 +394,9 @@ async function callViaOpencodeWithClient(
   } finally {
     try {
       await v2Client.session.delete({ sessionID });
-    } catch {}
+    } catch {
+      // ignore cleanup failures for ephemeral sessions
+    }
   }
 }
 

@@ -310,8 +310,6 @@ function generateChangeSummary(oldProfile: UserProfileData, newProfile: UserProf
 }
 
 function buildCategorySummary(profileData: UserProfileData): string {
-  const parts: string[] = [];
-
   const prefCats = [...new Set(profileData.preferences.map((p) => p.category))];
   const patCats = [...new Set(profileData.patterns.map((p) => p.category))];
 
@@ -624,7 +622,9 @@ async function applyValidations(
         // included or lost nondeterministically. Failures stay non-fatal.
         try {
           await userProfileManager.evolveAndUpdate(item, itemType, profileId);
-        } catch {}
+        } catch {
+          // description evolution is best-effort
+        }
       }
     } else {
       results.push(`no_evidence [${v.index}] ${v.reason}`);

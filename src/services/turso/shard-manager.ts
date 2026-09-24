@@ -588,7 +588,6 @@ export class TursoShardManager {
     }
 
     const scope = String(row.scope) as "user" | "project";
-    const shardIndex = Number(row.shard_index);
     const storedPath = join(`${scope}s`, basename(newDbPath)).replace(/\\/g, "/");
 
     await metadataDb.run(
