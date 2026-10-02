@@ -80,6 +80,18 @@ For OpenCode v1, add the default entrypoint to your configuration at
 
 With `@latest` (or a semver range) and `autoUpdate: true` in `opencode-mem.jsonc` (default), the plugin clears OpenCode's cached install when a newer npm release is available and asks you to restart. Pinned versions like `opencode-mem@2.26.0` are never auto-updated.
 
+### Using a local checkout
+
+To run the plugin from a local source checkout instead of the npm release, `bun install && bun run build` in the checkout, then point the `plugins` list at the checkout directory:
+
+```jsonc
+{
+  "plugins": ["/absolute/path/to/opencode-mem"],
+}
+```
+
+Point at the package root, not at `dist/` or a single file. OpenCode resolves a directory plugin by falling back to `<directory>/index` (OpenCode does not read `package.json` `exports`/`main` for a path spec on current releases), so this repository ships a thin root `index.js` that re-exports the built v2 entrypoint from `dist/plugin.js`. A path to a file is rejected (`configured plugin path must be a directory`), and a directory without a root `index.js` is skipped silently.
+
 ### Optional database encryption at rest
 
 Enable AES-256-GCM encryption for local Turso shards in `~/.config/opencode/opencode-mem.jsonc`:
