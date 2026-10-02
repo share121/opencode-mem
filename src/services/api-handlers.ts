@@ -1521,6 +1521,19 @@ export async function handleRunTagMigrationBatch(
               .filter((t: string) => t)
           : [];
 
+        // A memory that already has tags and a tags vector is fully migrated:
+        // re-embedding it produces the same vector and changes nothing. This
+        // endpoint walks the whole list one window at a time, and the normal
+        // case is a handful of untagged memories among hundreds that are done,
+        // so skipping the finished ones is the difference between a few
+        // seconds and re-vectorizing every memory on every run. Memories with
+        // tags but no tags vector are still processed so the missing vector is
+        // rebuilt.
+        if (currentTags.length > 0 && m.tags_vector != null) {
+          migrationProgress.processed++;
+          continue;
+        }
+
         if (currentTags.length === 0) {
           const prompt = `Generate 2-4 short technical tags for this memory content. Call the save_tags tool with a "tags" array.\n\n${m.content}`;
           const result = await provider.executeToolCall(
